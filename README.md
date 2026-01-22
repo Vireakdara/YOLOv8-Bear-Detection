@@ -75,29 +75,39 @@ pip install -r requirements.txt
 
 ### Option 1: Automated Quick Start (RECOMMENDED)
 ```bash
-# Download iNaturalist dataset and start training
+# Start training with extracted Roboflow dataset
 python quickstart.py
-
-# Or with custom dataset size
-python quickstart.py --dataset-count 1000
-
-# Just setup dataset without training
-python quickstart.py --setup-only
 ```
 
-### Option 2: Step by Step
+### Option 2: Download & Train
 
-1. **Download Dataset (iNaturalist - Best Results)**:
+#### Download Roboflow Dataset (Recommended - Easiest)
+1. Download from: https://universe.roboflow.com/ds/c6gkywSzAj?key=ymftU7vee3
+2. Extract the ZIP file to your project folder
+3. The script will automatically detect and organize it
+4. Run training: `python quickstart.py`
+
+#### Or Download iNaturalist Dataset (Slower - Takes 10+ minutes)
 ```bash
-python scripts/download_dataset.py --inaturalist --inaturalist-count 500
+python quickstart.py --inaturalist --dataset-count 200
 ```
 
-2. **Train Model**:
+#### Or Use Sample Dataset (Fast - For Testing)
 ```bash
-python scripts/train_yolo.py
+python quickstart.py --sample
 ```
 
-3. **Evaluate Model**:
+### Training Options
+```bash
+# Custom epoch count
+python quickstart.py --epochs 150
+
+# Custom batch size
+python quickstart.py --batch-size 8
+
+# GPU selection
+python quickstart.py --device 0
+```
 ```bash
 python scripts/evaluate.py \
   --model results/bear_detection_yolov8x/weights/best.pt \

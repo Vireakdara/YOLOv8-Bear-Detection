@@ -2,12 +2,13 @@
 """
 Quick Start Training Script for Bear Detection
 Minimal setup needed - just run this to start training
-Uses iNaturalist dataset with challenging backgrounds for best results
+Uses Roboflow dataset with challenging backgrounds for best results
 """
 
 import sys
 from pathlib import Path
 import argparse
+import time
 
 # Add scripts to path
 sys.path.insert(0, str(Path(__file__).parent / 'scripts'))
@@ -21,8 +22,8 @@ def main():
                        help='Only setup dataset, do not train')
     parser.add_argument('--sample', action='store_true',
                        help='Use sample dataset for quick testing')
-    parser.add_argument('--inaturalist', action='store_true', default=True,
-                       help='Use iNaturalist dataset (default, challenging backgrounds)')
+    parser.add_argument('--inaturalist', action='store_true',
+                       help='Use iNaturalist dataset (download, slow)')
     parser.add_argument('--dataset-count', type=int, default=500,
                        help='Number of iNaturalist images to download (default: 500)')
     parser.add_argument('--epochs', type=int, default=100,
@@ -38,11 +39,51 @@ def main():
     print("YOLO Bear Detection - Quick Start")
     print("="*70 + "\n")
     
-    # Setup dataset
+    # Check for extracted Roboflow dataset first
     print("[1/3] Setting up dataset...")
+    has_extracted_data = (Path('./train').exists() and Path('./train/images').exists()) or \
+                         (Path('./data/images/train').exists())
+    
+    print(f"      Checking for existing data...", end=" ", flush=True)
+    if has_extracted_data:
+        print("✓ Found!")
+    else:
+        print("✗")
+    
     downloader = BearDatasetDownloader('./data')
     
-    if args.sample:
+    if has_extracted_data:
+        print("      [+] Found extracted dataset (train/valid/test folders)")
+        # Organize extracted data into data/ folder structure
+        if Path('./train').exists():
+            print("      Organizing Roboflow dataset structure...")
+            import shutil
+            data_dir = Path('./data')
+            
+            # Move train/valid/test to data/images and data/labels
+            for split_src, split_dst in [('./train', 'train'), ('./valid', 'val'), ('./test', 'test')]:
+                src_path = Path(split_src)
+                if src_path.exists():
+                    # Images
+                    img_src = src_path / 'images'
+                    img_dst = data_dir / 'images' / split_dst
+                    if img_src.exists():
+                        img_dst.parent.mkdir(parents=True, exist_ok=True)
+                        if img_dst.exists():
+                            shutil.rmtree(img_dst)
+                        shutil.copytree(img_src, img_dst)
+                        print(f"      [+] {split_dst} images: {len(list(img_dst.glob('*')))} files")
+                    
+                    # Labels
+                    lbl_src = src_path / 'labels'
+                    lbl_dst = data_dir / 'labels' / split_dst
+                    if lbl_src.exists():
+                        lbl_dst.parent.mkdir(parents=True, exist_ok=True)
+                        if lbl_dst.exists():
+                            shutil.rmtree(lbl_dst)
+                        shutil.copytree(lbl_src, lbl_dst)
+                        print(f"      [+] {split_dst} labels: {len(list(lbl_dst.glob('*')))} files")
+    elif args.sample:
         print("      Using sample dataset for quick testing...")
         downloader.create_sample_dataset()
     elif args.inaturalist:
@@ -59,18 +100,24 @@ def main():
             downloader.create_sample_dataset()
     
     downloader.verify_dataset()
+    print()  # New line
     
     if args.setup_only:
-        print("\n[+] Dataset setup complete!")
+        print("[+] Dataset setup complete!")
         print("    To train: python quickstart.py")
         return
     
     # Train model
-    print("\n[2/3] Preparing training...")
+    print("[2/3] Preparing training environment...")
+    print("      Loading configuration...", end=" ", flush=True)
     trainer = BearYOLOTrainer(config_path='configs/training_config.yaml')
+    print("✓\n")
     
-    print("\n[3/3] Starting training...")
-    print("      This may take a while depending on GPU and dataset size...")
+    print("[3/3] Starting training...")
+    print("      Monitor progress below:\n")
+    
+    # Add small delay to show all messages before training starts
+    time.sleep(0.5)
     
     try:
         trainer.train(dataset_yaml='configs/bear_dataset.yaml')
