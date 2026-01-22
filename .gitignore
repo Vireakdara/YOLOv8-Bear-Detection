@@ -3,11 +3,13 @@
 *.pth
 *.onnx
 
-# Large dataset directories
-data/images/
-data/labels/
-!data/images/.gitkeep
-!data/labels/.gitkeep
+# Large dataset directories - consolidated in dataset/ folder
+dataset/images/
+dataset/labels/
+train/
+valid/
+test/
+data/
 
 # Training results and runs
 runs/

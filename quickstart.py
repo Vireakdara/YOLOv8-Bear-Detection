@@ -9,12 +9,16 @@ import sys
 from pathlib import Path
 import argparse
 import time
+import shutil
 
 # Add scripts to path
-sys.path.insert(0, str(Path(__file__).parent / 'scripts'))
+scripts_path = Path(__file__).parent / 'scripts'
+sys.path.insert(0, str(scripts_path))
 
 from train_yolo import BearYOLOTrainer
 from download_dataset import BearDatasetDownloader
+
+DATASET_ROOT = Path('./dataset')
 
 def main():
     parser = argparse.ArgumentParser(description="Quick Start: Train Bear Detection Model")
@@ -42,7 +46,8 @@ def main():
     # Check for extracted Roboflow dataset first
     print("[1/3] Setting up dataset...")
     has_extracted_data = (Path('./train').exists() and Path('./train/images').exists()) or \
-                         (Path('./data/images/train').exists())
+                         (Path('./valid').exists() and Path('./valid/images').exists()) or \
+                         (DATASET_ROOT / 'images' / 'train').exists()
     
     print(f"      Checking for existing data...", end=" ", flush=True)
     if has_extracted_data:
@@ -50,39 +55,40 @@ def main():
     else:
         print("✗")
     
-    downloader = BearDatasetDownloader('./data')
+    downloader = BearDatasetDownloader(str(DATASET_ROOT))
     
     if has_extracted_data:
         print("      [+] Found extracted dataset (train/valid/test folders)")
-        # Organize extracted data into data/ folder structure
-        if Path('./train').exists():
-            print("      Organizing Roboflow dataset structure...")
-            import shutil
-            data_dir = Path('./data')
+        # Organize extracted data into consolidated dataset/ folder structure
+        if Path('./train').exists() or Path('./valid').exists():
+            print("      Organizing dataset into: ./dataset/")
+            DATASET_ROOT.mkdir(exist_ok=True)
             
-            # Move train/valid/test to data/images and data/labels
+            # Move train/valid/test to dataset/images and dataset/labels
             for split_src, split_dst in [('./train', 'train'), ('./valid', 'val'), ('./test', 'test')]:
                 src_path = Path(split_src)
                 if src_path.exists():
                     # Images
                     img_src = src_path / 'images'
-                    img_dst = data_dir / 'images' / split_dst
+                    img_dst = DATASET_ROOT / 'images' / split_dst
                     if img_src.exists():
                         img_dst.parent.mkdir(parents=True, exist_ok=True)
                         if img_dst.exists():
                             shutil.rmtree(img_dst)
                         shutil.copytree(img_src, img_dst)
-                        print(f"      [+] {split_dst} images: {len(list(img_dst.glob('*')))} files")
+                        img_count = len(list(img_dst.glob('*')))
+                        print(f"      ✓ {split_dst}: {img_count} images")
                     
                     # Labels
                     lbl_src = src_path / 'labels'
-                    lbl_dst = data_dir / 'labels' / split_dst
+                    lbl_dst = DATASET_ROOT / 'labels' / split_dst
                     if lbl_src.exists():
                         lbl_dst.parent.mkdir(parents=True, exist_ok=True)
                         if lbl_dst.exists():
                             shutil.rmtree(lbl_dst)
                         shutil.copytree(lbl_src, lbl_dst)
-                        print(f"      [+] {split_dst} labels: {len(list(lbl_dst.glob('*')))} files")
+                        lbl_count = len(list(lbl_dst.glob('*')))
+                        print(f"      ✓ {split_dst}: {lbl_count} labels")
     elif args.sample:
         print("      Using sample dataset for quick testing...")
         downloader.create_sample_dataset()
@@ -120,7 +126,7 @@ def main():
     time.sleep(0.5)
     
     try:
-        trainer.train(dataset_yaml='configs/bear_dataset.yaml')
+        trainer.train(dataset_yaml='configs/data.yaml')
         print("\n" + "="*70)
         print("[SUCCESS] Training complete!")
         print("="*70)

@@ -1,7 +1,7 @@
 # Bear Detection Dataset Configuration
 # YOLOv8 dataset.yaml format
 
-path: ./data  # dataset root
+path: ./dataset  # dataset root
 train: images/train  # train images
 val: images/val  # val images
 test: images/test  # test images (optional)
