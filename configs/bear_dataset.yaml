@@ -1,0 +1,15 @@
+# Bear Detection Dataset Configuration
+# YOLOv8 dataset.yaml format
+
+path: ./data  # dataset root
+train: images/train  # train images
+val: images/val  # val images
+test: images/test  # test images (optional)
+
+nc: 1  # number of classes
+names: ['bear']  # class names
+
+# Notes:
+# - The dataset uses challenging backgrounds with complex environmental conditions
+# - Images include bears in forests, mountains, and various lighting conditions
+# - Includes bear cubs, partially occluded bears, and distant subjects

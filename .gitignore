@@ -1,0 +1,60 @@
+# YOLO model weights
+*.pt
+*.pth
+*.onnx
+
+# Large dataset directories
+data/images/
+data/labels/
+!data/images/.gitkeep
+!data/labels/.gitkeep
+
+# Training results and runs
+runs/
+results/
+models/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Conda
+conda-env/
+
+# Logs
+*.log
