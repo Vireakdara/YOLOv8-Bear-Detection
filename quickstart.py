@@ -126,7 +126,7 @@ def main():
     time.sleep(0.5)
     
     try:
-        trainer.train(dataset_yaml='configs/data.yaml')
+        trainer.train(dataset_yaml='configs.yaml')
         print("\n" + "="*70)
         print("[SUCCESS] Training complete!")
         print("="*70)
