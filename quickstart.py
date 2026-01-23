@@ -28,7 +28,7 @@ def main():
                        help='Use sample dataset for quick testing')
     parser.add_argument('--inaturalist', action='store_true',
                        help='Use iNaturalist dataset (download, slow)')
-    parser.add_argument('--dataset-count', type=int, default=500,
+    parser.add_argument('--dataset-count', type=int, default=10,
                        help='Number of iNaturalist images to download (default: 500)')
     parser.add_argument('--epochs', type=int, default=100,
                        help='Number of training epochs')
@@ -126,7 +126,7 @@ def main():
     time.sleep(0.5)
     
     try:
-        trainer.train(dataset_yaml='configs.yaml')
+        trainer.train(dataset_yaml='configs/data.yaml')
         print("\n" + "="*70)
         print("[SUCCESS] Training complete!")
         print("="*70)
